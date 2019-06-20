@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node scraper.js"
+    "start": "node webscraper.js"
   },
   "author": "",
   "license": "ISC",
