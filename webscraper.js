@@ -30,7 +30,8 @@ async function send(pricetoday) {
 
 async function run() {
   const browser = await puppeteer.launch({
-    headless: true
+    headless: true,
+    args: ['--no-sandbox']
   });
   const page = await browser.newPage();
   // dom element selectors
