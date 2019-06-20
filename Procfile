@@ -1,1 +1,1 @@
-worker node webscraper.js
+web: node webscraper.js
