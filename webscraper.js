@@ -1,31 +1,22 @@
-require('dotenv').config();
-const puppeteer = require('puppeteer');
-const rp = require('request-promise');
-var $ = require('cheerio');
 
-async function send(pricetoday) {
-  var options = {
-    uri: 'https://io.adafruit.com/api/v2/' + process.env.ADAFRUIT_USERNAME + '/feeds/' + process.env.ADAFRUIT_FEED_KEY + '/data',
+import puppeteer from 'puppeteer'
+import got from 'got'
+
+async function send(feedKey, data) {
+  const options = {
+    url: 'https://io.adafruit.com/api/v2/' + process.env.ADAFRUIT_USERNAME + '/feeds/' + feedKey + '/data',
     method: 'POST',
     headers: {
-      'User-Agent': 'Request-Promise',
+      'User-Agent': 'Got',
       'X-AIO-Key': process.env.ADAFRUIT_AIO
     },
-    body: {
-      value: pricetoday
-    },
-    json: true // Automatically parses the JSON string in the response
+    json: {
+      value: data
+    }
   };
-  
-  rp(options)
-    .then(function (res) {
-      console.log('Response: %s', res);
-    })
-    .catch(function (err) {
-      // API call failed...
-      console.log('API Post request failed with error:')
-      console.log(err);
-    });
+
+  const response = await got(options);
+  if(response.statusCode !== 200) throw new Error('Send to Adafruit failed : ' + response.statusCode)
 }
 
 async function run() {
@@ -38,36 +29,29 @@ async function run() {
   const USERNAME_SELECTOR = '#email_check';
   const PASSWORD_SELECTOR = '#password_check';
   const BUTTON_SELECTOR = '#cmdLogin';
-  const PRICE_SELECTOR = '#user-summary-table > tbody > tr:nth-child(14) > td.user-info-right-col';
+  const PRICE_SELECTOR = 'body.user-record-summary:nth-child(2) div.outer-div table.body-table:nth-child(2) tr.main-row:nth-child(4) td.main-column div.main-div div.user-info:nth-child(1) div.user-info-table-div table.user-info-table tbody:nth-child(2) tr.user-home-data.odd:nth-child(13) > td.user-info-right-col';
+  const LEVEL_SELECTOR = 'body.body-style:nth-child(2) div.outer-div table.body-table:nth-child(2) tr.main-row:nth-child(4) td.main-column div.main-div div:nth-child(2) table.tank-table:nth-child(1) tbody:nth-child(1) tr:nth-child(5) > td:nth-child(2)';
 
   await page.goto('https://myaccount.irvingenergy.com/login');
-  // await page.screenshot({
-  //   path: 'screenshots/loginpage.png'
-  // });
-
   await page.click(USERNAME_SELECTOR);
   await page.keyboard.type(process.env.IRVING_USERNAME);
-
   await page.click(PASSWORD_SELECTOR);
   await page.keyboard.type(process.env.IRVING_PASSWORD);
-
   await page.click(BUTTON_SELECTOR);
-
-  // await page.waitForNavigation();
-  // await page.screenshot({
-  //   path: 'screenshots/homepage.png'
-  // });
-
   await page.waitForSelector(PRICE_SELECTOR);
-
   let price = await page.evaluate((sel) => {
     return document.querySelector(sel).outerText;
   }, PRICE_SELECTOR);
-
   console.log('Price : ' + price);
-  send(price);
-
-  browser.close();
+  await page.goto('https://myaccount.irvingenergy.com/tankmonitors')
+  let level = await page.evaluate((sel) => {
+    return document.querySelector(sel).outerText;
+  }, LEVEL_SELECTOR);
+  console.log('Level : ' + level.split(".")[0]);
+  await page.goto('https://myaccount.irvingenergy.com/logout')
+  await send('propaneprice', price);
+  await send('propanelevel', level)
+  await browser.close();
 }
 
 // main body
