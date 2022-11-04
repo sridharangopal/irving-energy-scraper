@@ -9,7 +9,7 @@ on:
   pull_request:
     branches: [ "master" ]
   schedule:
-    - cron: '15 * * * *'
+    - cron: '5 * * * *'
 
 jobs:
   build:
@@ -18,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x]
+        node-version: [16.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
