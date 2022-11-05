@@ -24,6 +24,7 @@ async function send(feedKey, data) {
 async function run() {
   const browser = await puppeteer.launch({
     headless: true,
+    timeout: 60000,
     args: ['--no-sandbox','--disable-setuid-sandbox']
   });
   const page = await browser.newPage();
