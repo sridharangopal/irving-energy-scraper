@@ -11,6 +11,12 @@ on:
   schedule:
     - cron: '5 * * * *'
 
+env:
+  IRVING_USERNAME: ${{ secrets.IRVING_PASSWORD }}
+  IRVING_PASSWORD: ${{ secrets.IRVING_PASSWORD }}
+  ADAFRUIT_AIO: ${{ secrets.ADAFRUIT_AIO }}
+  ADAFRUIT_USERNAME: ${{ secrets.ADAFRUIT_USERNAME }}
+
 jobs:
   build:
 
